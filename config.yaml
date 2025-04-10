@@ -1,0 +1,77 @@
+# name of the project
+name: exp
+run_id: deepsse
+# type of dataset and args
+dataset:
+  type: CommonDataset
+  args:
+    data_path:
+      - data/dataset_1.h5
+      - data/dataset_2.h5
+      - data/dataset_3.h5
+      - data/dataset_4.h5
+    label_path:
+      - data/labels_1.h5
+      - data/labels_2.h5
+      - data/labels_3.h5
+      - data/labels_4.h5
+    lazy: false
+# type of model and args
+model:
+  type: DeepSSE
+  args:
+    num_class: 180
+    num_antenna: 16
+    antenna_spacing: 0.5
+    img_channels: 3
+    in_channels: 32
+    out_channels: 32
+    layers:
+      - 2
+      - 2
+    activation: gelu
+    d_model: 128
+    nhead: 8
+    num_ca_layers: 2
+    dim_feedforward: 512
+    dropout: 0.05
+# type of loss and args
+loss:
+  type: AsymmetricLoss
+  args:
+    gamma_neg: 4
+    gamma_pos: 1
+    clip: 0.05
+    eps: 1e-08
+    disable_torch_grad_focal_loss: true
+# metrics used to evaluate model
+metrics:
+  - micro_ap
+  - f1_score
+# type of optimizer and args
+optimizer:
+  type: Adam
+  args:
+    lr: 0.001 # learning rate
+    weight_decay: 0
+    amsgrad: true
+# type of learning rate scheduler and args
+lr_scheduler:
+  type: StepLR
+  args:
+    step_size: 20
+    gamma: 0.5
+# args of data loader
+data_loader:
+  batch_size: 64 # batch size
+  shuffle: true # shuffle data or not
+  validation_split: 0.2 # rate to divide validation
+# training parameters
+trainer:
+  epochs: 100 # trainig epoches
+  save_dir: saved/ # where to save model
+  save_period: 1 # save the model every xx epoches
+  max_saved_num: 5 # only keey the newest xx saved model
+  verbosity: 2 # logging level
+  monitor: max f1_score # how to evaluate the performance of model
+  early_stop: 20 # stop training if no improvement for more than xx epochs

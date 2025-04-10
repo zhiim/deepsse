@@ -19,7 +19,7 @@ git clone https://github.com/zhiim/deepsse.git
 Init the submodule.
 
 > [!NOTE]  
->[doa_py](https://github.com/zhiim/doa_py) is embedded as git submodule. But do not pull new commit, as there may be incompatibility.
+> [doa_py](https://github.com/zhiim/doa_py) is embedded as git submodule. But do not pull new commit, as there may be incompatibility.
 
 ```python
 git submodule init
@@ -53,3 +53,11 @@ python gen_data.py data/4.yaml
 ```python
 python train.py -c config.yaml
 ```
+
+## License
+
+This project is licensed under the [MIT](LICENSE) License - see the LICENSE file for details.
+
+## Acknowledgements
+
+Some code references [PyTorch Template Project](https://github.com/victoresque/pytorch-template) and [DA-MUSIC](https://github.com/DA-MUSIC/TVT23).

@@ -1,0 +1,70 @@
+project_name: paper
+# name used to save config file, support .json and .yaml
+config_name: 3.yaml
+# where to save dataset and labels
+save_path:
+  dataset: dataset_3.h5
+  label: labels_3.h5
+# DataGenerator used to generate dataset
+generator: FixedMultiSignalDataGenerator
+# data processing function used upon generated siganl before saving to dataset
+data_process:
+  type: cal_cov
+  args:
+    use_phase: true
+# data processing function used upon labels before saving to dataset
+label_process:
+  type: cal_multi_hot
+# max num of data
+num_data: 600000
+# saving every xx items
+save_threthod: 50000
+# use multi-processing provided by joblib or not
+parallelism: false
+# number of thread
+# n_jobs: 4
+# work mode of joblib
+# paral_mode: "processes"
+# type of array and args
+array:
+  type: UniformLinearArray
+  args:
+    m: 16
+    dd: 15
+# type of signal and args
+signal:
+  type: RandomFreqSignal
+  args:
+    fc: 10000000.0
+# generating xx times at a specific SNR and DOA
+num_repeat: 1
+# number of signal snapshots
+nsamples: 300
+snrs:
+  - -10
+  - -9
+  - -8
+  - -7
+  - -6
+  - -5
+  - -4
+  - -3
+  - -2
+  - -1
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+doas:
+  azimuth:
+    range:
+      - -90
+      - 90
+    grid: 1
+  # should be set to false if use 1D DOA
+  elevation: false
+  num_signal: 3
+  # degree or radian
+  unit: deg
