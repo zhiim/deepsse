@@ -103,3 +103,70 @@ class AngleFeatureProjector(BaseModule):
 
     def forward(self, x):
         return self.angle_proj(x)
+
+
+def _get_activation_fn(activation):
+    """Return an activation function given a string"""
+    if activation == "relu":
+        return nn.functional.relu
+    if activation == "gelu":
+        return nn.functional.gelu
+    if activation == "glu":
+        return nn.functional.glu
+    raise RuntimeError(f"activation should be relu/gelu/glu, not {activation}.")
+
+
+def _get_clones(module, n):
+    return nn.ModuleList([copy.deepcopy(module) for _ in range(n)])
+
+
+class CALayer(nn.Module):
+    def __init__(
+        self,
+        d_model,
+        nhead,
+        dim_feedforward=2048,
+        dropout=0.1,
+        activation="relu",
+    ):
+        """Cross attention layer, attention + FFN like Transformer's decoder."""
+        super().__init__()
+        self.multihead_attn = nn.MultiheadAttention(
+            d_model, nhead, dropout=dropout
+        )
+
+        # Implementation of Feedforward model
+        self.linear1 = nn.Linear(d_model, dim_feedforward)
+        self.dropout = nn.Dropout(dropout)
+        self.linear2 = nn.Linear(dim_feedforward, d_model)
+
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+        self.dropout1 = nn.Dropout(dropout)
+        self.dropout2 = nn.Dropout(dropout)
+
+        self.activation = _get_activation_fn(activation)
+
+    def forward(
+        self,
+        query,
+        feature,
+        pos,
+    ):
+        # -- cross-attention ---------------------------------------------------
+        tgt1, _ = self.multihead_attn(
+            query=query,
+            key=feature + pos,
+            value=feature,
+        )
+
+        # -- FFN ---------------------------------------------------------------
+        tgt = query + self.dropout1(tgt1)
+        tgt = self.norm1(tgt)
+
+        tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt))))
+
+        tgt = tgt + self.dropout2(tgt2)
+        tgt = self.norm2(tgt)
+
+        return tgt
