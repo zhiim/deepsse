@@ -170,3 +170,31 @@ class CALayer(nn.Module):
         tgt = self.norm2(tgt)
 
         return tgt
+
+
+class CABlock(nn.Module):
+    def __init__(self, decoder_layer, num_layers, norm=None):
+        super().__init__()
+        self.layers = _get_clones(decoder_layer, num_layers)
+        self.num_layers = num_layers
+        self.norm = norm
+
+    def forward(
+        self,
+        query,
+        feature,
+        pos: Optional[Tensor] = None,
+    ):
+        output = query
+
+        for layer in self.layers:
+            output = layer(
+                output,
+                feature,
+                pos=pos,
+            )
+
+        if self.norm is not None:
+            output = self.norm(output)
+
+        return output
