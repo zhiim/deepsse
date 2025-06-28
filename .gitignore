@@ -1,5 +1,4 @@
 *.csv
-uv.lock
 exp/**/data/
 *.h5
 *.pt

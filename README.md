@@ -29,7 +29,6 @@ git submodule update
 [uv](https://github.com/astral-sh/uv) is recommended to manage this project.
 
 ```python
-uv venv
 uv sync
 ```
 
