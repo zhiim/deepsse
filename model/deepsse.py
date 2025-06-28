@@ -198,3 +198,43 @@ class CABlock(nn.Module):
             output = self.norm(output)
 
         return output
+
+
+class AngularGridSearch(BaseModule):
+    def __init__(
+        self,
+        d_model=512,
+        nhead=8,
+        num_ca_layers=1,
+        dim_feedforward=2048,
+        dropout=0.1,
+        activation="relu",
+    ):
+        super().__init__()
+
+        ca_layer = CALayer(
+            d_model=d_model,
+            nhead=nhead,
+            dim_feedforward=dim_feedforward,
+            dropout=dropout,
+            activation=activation,
+        )
+
+        norm = nn.LayerNorm(d_model)
+        self.ca_block = CABlock(ca_layer, num_ca_layers, norm)
+
+        self.d_model = d_model
+
+    def forward(self, feature, query, pos_embed):
+        # feature: (HW, bs, d)
+        # query: (num_class, bs, d)
+        # pos_embed: (HW, bs, d)
+
+        out = self.ca_block(
+            query,  # (num_clas, bs, d)
+            feature,  # feature from SFE, (hw, bs, d)
+            pos=pos_embed,  # pos encoding of feature
+        )
+
+        # hs: (bs, K, d)
+        return out.transpose(0, 1)
