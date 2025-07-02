@@ -238,3 +238,27 @@ class AngularGridSearch(BaseModule):
 
         # hs: (bs, K, d)
         return out.transpose(0, 1)
+
+
+class FeatureWiseLinear(nn.Module):
+    def __init__(self, num_class, hidden_dim, bias=True):
+        super().__init__()
+        self.num_class = num_class
+        self.hidden_dim = hidden_dim
+        self.bias = bias
+
+        self.W = nn.Parameter(torch.Tensor(1, num_class, hidden_dim))
+        if bias:
+            self.b = nn.Parameter(torch.Tensor(1, num_class))
+
+    def forward(self, x):
+        # x: (bs, num_class, d)
+        # self.W: (1, num_class, d)
+        x = (self.W * x).sum(-1)
+        # point-wise mul and sum in the last dim, x will be (bs, num_class)
+
+        if self.bias:
+            x = x + self.b
+            # broadcast when adding bias, x will be (bs, num_class)
+
+        return x
