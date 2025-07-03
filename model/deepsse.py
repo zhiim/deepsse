@@ -262,3 +262,86 @@ class FeatureWiseLinear(nn.Module):
             # broadcast when adding bias, x will be (bs, num_class)
 
         return x
+
+
+class TransForm(BaseModule):
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+
+        self.input_proj = nn.Conv2d(in_channels, out_channels, kernel_size=1)
+
+    def forward(self, x):
+        x = self.input_proj(x)
+        x = x.flatten(2).permute(2, 0, 1)
+
+        return x
+
+
+class DeepSSE(BaseModel):
+    def __init__(self, num_class, num_antenna, antenna_spacing, **kwargs):
+        """Deep Learning based Spatial Spectrum Estimator."""
+        super().__init__()
+        self.sfe = SpatialFeatureExtractor.build_model(**kwargs)
+
+        self.ags = AngularGridSearch.build_model(**kwargs)
+
+        self.pos_embed = PositionEncoding2D(
+            num_pos_feats=self.ags.d_model // 2,
+            maxh=num_antenna,
+            maxw=num_antenna,
+        )
+
+        hidden_dim = self.ags.d_model
+
+        self.transform = TransForm(self.sfe.out_channels, hidden_dim)
+
+        self.angle_projector = AngleFeatureProjector(
+            3 * num_antenna, hidden_dim
+        )
+
+        self.fc = FeatureWiseLinear(num_class, hidden_dim, bias=True)
+
+        self._get_steering_vectors(num_class, num_antenna, antenna_spacing)
+
+    def _get_steering_vectors(self, num_class, num_antenna, antenna_spacing):
+        grids = torch.linspace(-90, 90 - 180 / num_class, num_class)
+        antenna_position = (
+            (torch.arange(0, num_antenna, 1) * antenna_spacing)
+            .view(-1, 1)
+            .to(torch.float)
+        )
+        delay = antenna_position @ torch.sin(grids).view(1, -1)
+
+        steering_vetor = torch.exp(-2j * math.pi * delay)
+        steering_vetor = torch.cat(
+            (steering_vetor.real, steering_vetor.imag, steering_vetor.angle()),
+            dim=0,
+        )
+
+        self.register_buffer("angle_embed", steering_vetor.transpose(0, 1))
+
+    def forward(self, x):
+        # inp: (bs, C, H_0, W_0)
+        bs, _, _, _ = x.shape
+
+        spatial_feature = self.sfe(x)  # (bs, d_0, H, W)
+
+        angle_embed = self.angle_projector(self.angle_embed)  # (num_class, d)
+        angle_embed = angle_embed.unsqueeze(1).repeat(
+            1, bs, 1
+        )  # (num_class, bs, d)
+
+        pos_embed = self.pos_embed(
+            spatial_feature
+        )  # pos_embed of spatial feature: (bs, 2*d//2, H, W)
+        pos_embed = pos_embed.flatten(2).permute(2, 0, 1)  # (HW, bs, d)
+
+        out = self.ags(
+            feature=self.transform(spatial_feature),
+            query=angle_embed,
+            pos_embed=pos_embed,
+        )
+
+        out = self.fc(out)
+
+        return torch.sigmoid(out)
