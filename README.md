@@ -32,11 +32,11 @@ git submodule update
 uv sync
 ```
 
-## How to Training
+## How to Train
 
 ### Obtain Datasets
 
-- Download the original dataset used in our paper from [here](https://drive.google.com/drive/folders/1cK2AikE1b8V72EVCZ-yZk_MaitZgKVRl?usp=drive_link).
+- Download the original dataset used in our paper from [Google Drive](https://drive.google.com/drive/folders/1cK2AikE1b8V72EVCZ-yZk_MaitZgKVRl?usp=drive_link).
 - Or generate the dataset yourself
 
 ```python
