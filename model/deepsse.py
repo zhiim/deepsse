@@ -1,7 +1,3 @@
-# +----------------------------------------------------------+
-# | we will add other parts as soon as we finish the review  |
-# +----------------------------------------------------------+
-
 import copy
 import math
 from typing import Optional

@@ -16,7 +16,7 @@ First clone this repository.
 git clone https://github.com/zhiim/deepsse.git
 ```
 
-Init the submodule.
+Init the submodule [doa_py](https://github.com/zhiim/doa_py).
 
 > [!NOTE]  
 > [doa_py](https://github.com/zhiim/doa_py) is embedded as git submodule. But do not pull new commit, as there may be incompatibility.
