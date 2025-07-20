@@ -2,7 +2,7 @@
 
 This repository includes the source code used in our recent paper:
 
-Qian Xu, Yulong Gao, Ruoyu Zhang, Jinshan Kong and Chau Yuen. "Deep Learning-Based DOA Estimation via Grid Search Approach for Unknown and Variable Number of Signals"
+Qian Xu, Yulong Gao, Ruoyu Zhang, Jinshan Kong and Chau Yuen. "Deep Learning-Based DOA Estimation via Grid Search Approach for Unknown and Variable Number of Signals" in IEEE Transactions on Cognitive Communications and Networking
 
 ## Abstract
 
