@@ -24,13 +24,10 @@ model:
     num_antenna: 16
     antenna_spacing: 0.5
     img_channels: 3
-    in_channels: 32
-    out_channels: 32
-    layers:
-      - 2
-      - 2
+    in_channels: 128
+    out_channels: 128
     activation: gelu
-    d_model: 128
+    d_model: 256
     nhead: 8
     num_ca_layers: 2
     dim_feedforward: 512
